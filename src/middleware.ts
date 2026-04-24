@@ -2,6 +2,24 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 import { ALLOWED_EMAIL } from '@/lib/config'
 
+/**
+ * Build a redirect response that preserves every cookie that
+ * `updateSession` wrote onto `supabaseResponse`. Per Supabase SSR guidance:
+ * NextResponse.redirect() creates a fresh response with no cookies, so any
+ * session-refresh cookies written during the upstream getUser() call are
+ * lost unless explicitly copied over.
+ */
+function redirectPreservingCookies(
+  url: URL,
+  supabaseResponse: NextResponse
+): NextResponse {
+  const redirect = NextResponse.redirect(url)
+  supabaseResponse.cookies.getAll().forEach((cookie) => {
+    redirect.cookies.set(cookie)
+  })
+  return redirect
+}
+
 export async function middleware(request: NextRequest) {
   const { user, supabaseResponse } = await updateSession(request)
 
@@ -16,7 +34,7 @@ export async function middleware(request: NextRequest) {
   if (!user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    return NextResponse.redirect(url)
+    return redirectPreservingCookies(url, supabaseResponse)
   }
 
   // Wrong user — sign out and redirect to login with error
@@ -24,7 +42,7 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     url.searchParams.set('error', 'restricted')
-    return NextResponse.redirect(url)
+    return redirectPreservingCookies(url, supabaseResponse)
   }
 
   return supabaseResponse
