@@ -39,9 +39,11 @@ export async function writeExtractionResults(
     }
   }
 
-  // 2. Upsert entities and create junctions
+  // 2. Upsert entities and create junctions. Track id-by-name so the actions
+  //    step can resolve owner_name / raised_by_name references without another round-trip.
+  const entityIdByName = new Map<string, string>()
+
   for (const entity of parsed.entities) {
-    // Upsert entity
     const { data: entityRow, error: entityErr } = await supabase
       .from('entities')
       .upsert(
@@ -60,7 +62,8 @@ export async function writeExtractionResults(
       continue
     }
 
-    // Create junction
+    entityIdByName.set(entity.name.toLowerCase(), entityRow.id)
+
     const { error: junctionErr } = await supabase
       .from('event_entities')
       .upsert(
@@ -75,6 +78,54 @@ export async function writeExtractionResults(
 
     if (junctionErr) {
       console.error('[persist] Failed to insert junction:', junctionErr)
+    }
+  }
+
+  // 2b. Insert actions extracted from this event.
+  //     raised_at is set from the event's captured_at — that is the authoritative
+  //     moment the obligation came into being, regardless of when extraction ran.
+  if (parsed.actions && parsed.actions.length > 0) {
+    const { data: eventRow } = await supabase
+      .from('events')
+      .select('captured_at')
+      .eq('id', eventId)
+      .single()
+    const raisedAt = eventRow?.captured_at ?? new Date().toISOString()
+
+    const actionRows = parsed.actions.map((a) => ({
+      user_id: userId,
+      source_event_id: eventId,
+      description: a.description,
+      source_kind: a.source_kind,
+      owner_entity_id: a.owner_name
+        ? (entityIdByName.get(a.owner_name.toLowerCase()) ?? null)
+        : null,
+      raised_by_entity_id: a.raised_by_name
+        ? (entityIdByName.get(a.raised_by_name.toLowerCase()) ?? null)
+        : null,
+      raised_at: raisedAt,
+      due_at: a.due_at ?? null,
+    }))
+
+    const { data: insertedActions, error: actionsErr } = await supabase
+      .from('actions')
+      .insert(actionRows)
+      .select('id')
+
+    if (actionsErr) {
+      console.error('[persist] Failed to insert actions:', actionsErr)
+    } else if (insertedActions && insertedActions.length > 0) {
+      writeAuditLog({
+        userId,
+        action: 'actions.create',
+        tableName: 'actions',
+        recordId: eventId,
+        afterData: {
+          source_event_id: eventId,
+          action_ids: insertedActions.map((a) => a.id),
+          count: insertedActions.length,
+        },
+      })
     }
   }
 

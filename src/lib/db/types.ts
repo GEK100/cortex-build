@@ -144,3 +144,72 @@ export interface EventWithExtraction extends Event {
   event_entities: (EventEntity & { entity: Entity })[]
   extraction_results: ExtractionResult[]
 }
+
+// ---- Actions ----
+
+export type ActionStatus = 'open' | 'closed' | 'disputed' | 'cancelled'
+export type ActionSourceKind = 'commitment' | 'rfi' | 'tq'
+
+export interface Action {
+  id: string
+  user_id: string
+  source_event_id: string
+  description: string
+  source_kind: ActionSourceKind
+  raised_by_entity_id: string | null
+  owner_entity_id: string | null
+  raised_at: string
+  due_at: string | null
+  closed_at: string | null
+  status: ActionStatus
+  evidence: string | null
+  is_deleted: boolean
+  deleted_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+// /api/actions list row: action row plus embedded owner/raised_by entity refs.
+export interface ActionListRow {
+  id: string
+  description: string
+  source_kind: ActionSourceKind
+  status: ActionStatus
+  raised_at: string
+  due_at: string | null
+  closed_at: string | null
+  evidence: string | null
+  source_event_id: string
+  owner: { id: string; canonical_name: string; entity_type: EntityType } | null
+  raised_by: { id: string; canonical_name: string; entity_type: EntityType } | null
+}
+
+// Row returned by /api/stakeholders list. Aggregates computed server-side.
+export interface StakeholderSummary {
+  id: string
+  entity_type: EntityType
+  canonical_name: string
+  aliases: string[]
+  metadata: Record<string, unknown>
+  created_at: string
+  updated_at: string
+  event_count: number
+  last_contact_at: string | null
+}
+
+// Slim row returned by /api/timeline: only the fields the feed needs.
+export interface TimelineEvent {
+  id: string
+  event_type: EventType
+  captured_at: string
+  raw_content: string | null
+  edited_content: string | null
+  photo_caption_raw: string | null
+  photo_caption_edited: string | null
+  extraction_status: ExtractionStatus
+  event_labels: EventLabel[]
+  extraction_results: Pick<
+    ExtractionResult,
+    'significance' | 'sentiment' | 'timeline_worthy' | 'timeline_headline'
+  >[]
+}

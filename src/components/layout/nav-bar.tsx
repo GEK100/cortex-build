@@ -2,11 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Mic, List } from 'lucide-react'
+import { Mic, List, Clock, Users, CheckSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { href: '/', label: 'Capture', icon: Mic },
+  { href: '/timeline', label: 'Timeline', icon: Clock },
+  { href: '/actions', label: 'Actions', icon: CheckSquare },
+  { href: '/stakeholders', label: 'People', icon: Users },
   { href: '/events', label: 'Events', icon: List },
 ]
 

@@ -5,11 +5,12 @@ Context: The user manages construction refurbishment projects in the UK. They ca
 You MUST:
 1. Assign one or more labels from the ontology (multi-label). Every capture gets at least one label. Multiple labels are expected when the content spans categories.
 2. Extract all named entities: people, organisations, trade packages, locations, drawing references, and document references.
-3. Assess sentiment (positive/negative/neutral/mixed) towards the overall situation described.
-4. Assign significance (1-5): 1 = routine note, 3 = noteworthy, 5 = critical decision or risk.
-5. Determine if this event is timeline-worthy (a milestone, key decision, significant event, or notable interaction). If so, write a concise headline (max 12 words).
-6. If the raw content has obvious transcription errors, provide a corrected version in corrected_content. Otherwise omit the field.
-7. Write a one-sentence summary of the capture.
+3. Extract any actionable obligations as items in the \`actions\` array (see rules below).
+4. Assess sentiment (positive/negative/neutral/mixed) towards the overall situation described.
+5. Assign significance (1-5): 1 = routine note, 3 = noteworthy, 5 = critical decision or risk.
+6. Determine if this event is timeline-worthy (a milestone, key decision, significant event, or notable interaction). If so, write a concise headline (max 12 words).
+7. If the raw content has obvious transcription errors, provide a corrected version in corrected_content. Otherwise omit the field.
+8. Write a one-sentence summary of the capture.
 
 Label definitions:
 - rfi: Request for Information — a question needing a formal answer from another party
@@ -29,6 +30,15 @@ Entity extraction rules:
 - Normalise names (e.g. "Tom" and "Tom Smith" from the same context = one entity)
 - For locations, be specific: "second floor corridor" not just "building"
 - For organisations, use their proper name where known
+
+Action extraction rules:
+- Include one \`actions\` entry for each distinct commitment, RFI, or TQ that has an identifiable owner or is an obligation to track. Not every capture has actions — \`actions\` may be an empty array.
+- \`description\`: a single clear sentence stating what must be done. Paraphrase; do not quote the raw transcript.
+- \`source_kind\`: "commitment" (someone promised to deliver), "rfi" (a question raised to a counterparty), or "tq" (a technical query).
+- \`owner_name\`: the entity canonical_name (from the entities array you extracted) responsible for delivering. Use null if the owner is the PM themselves or unknown.
+- \`raised_by_name\`: the entity who raised the obligation or made the commitment. Use null if unclear or if the PM is the one raising it.
+- \`due_at\`: an ISO 8601 datetime if a deadline is mentioned ("by Thursday", "end of next week"). Use the project date context to resolve relative phrases to absolute dates. Use null if no deadline is given.
+- Owner and raised_by names MUST match canonical_name values in the entities array exactly. Do not invent new names here.
 
 Confidence scores must reflect genuine certainty — do not inflate. A score of 0.6 means you are moderately confident.
 

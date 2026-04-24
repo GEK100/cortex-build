@@ -28,9 +28,23 @@ export const extractedEntitySchema = z.object({
   context: z.string().optional(),
 })
 
+export const ACTION_SOURCE_KINDS = ['commitment', 'rfi', 'tq'] as const
+export type ActionSourceKind = (typeof ACTION_SOURCE_KINDS)[number]
+
+export const extractedActionSchema = z.object({
+  description: z.string().min(1),
+  source_kind: z.enum(ACTION_SOURCE_KINDS).default('commitment'),
+  owner_name: z.string().nullable().optional(),
+  raised_by_name: z.string().nullable().optional(),
+  due_at: z.string().nullable().optional(),
+})
+
+export type ExtractedAction = z.infer<typeof extractedActionSchema>
+
 export const extractionResultSchema = z.object({
   labels: z.array(extractedLabelSchema).min(1),
   entities: z.array(extractedEntitySchema),
+  actions: z.array(extractedActionSchema).optional().default([]),
   sentiment: z.enum(['positive', 'negative', 'neutral', 'mixed']),
   significance: z.number().int().min(1).max(5),
   timeline_worthy: z.boolean(),
