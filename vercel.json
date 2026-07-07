@@ -1,0 +1,9 @@
+{
+  "crons": [
+    { "path": "/api/calendar/sync", "schedule": "*/30 * * * *" },
+    { "path": "/api/agents/meeting-prep", "schedule": "*/15 * * * *" },
+    { "path": "/api/agents/synthesise", "schedule": "0 22 * * *" },
+    { "path": "/api/agents/gap-find", "schedule": "15 22 * * *" },
+    { "path": "/api/agents/weekly-review", "schedule": "0 20 * * 0" }
+  ]
+}

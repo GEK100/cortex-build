@@ -22,7 +22,12 @@
       "Bash(git add:*)",
       "Bash(git reset:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: complete Week 1 capture layer with database-enforced immutability\n\nThree capture surfaces \\(voice/text/photo\\), Sonnet extraction pipeline,\noffline PWA with IndexedDB queue, single-user auth, and append-only\naudit log. Raw content immutability enforced by PostgreSQL trigger —\nnot application convention — blocking UPDATE on raw_content,\nphoto_caption_raw, and ocr_text \\(once set\\).\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "PowerShell(claude *)",
+      "Bash(git commit -q -m 'feat: week-3 chat surface with shared capture pipeline *)",
+      "Bash(git commit -q -m 'feat: week-3 email intake and Google Calendar *)",
+      "Bash(npm run *)",
+      "Bash(git commit -q -m 'feat: week-4 agents, dashboard, and decisions log *)"
     ]
   }
 }

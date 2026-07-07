@@ -75,6 +75,43 @@ self.addEventListener('fetch', (event) => {
   }
 })
 
+// Web Push: meeting-prep briefs and overdue-action alerts.
+self.addEventListener('push', (event: PushEvent) => {
+  let payload: { title?: string; body?: string; url?: string; tag?: string } = {}
+  try {
+    payload = event.data ? event.data.json() : {}
+  } catch {
+    payload = { body: event.data?.text() }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(payload.title || 'Cortex', {
+      body: payload.body || '',
+      tag: payload.tag,
+      data: { url: payload.url || '/dashboard' },
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+    })
+  )
+})
+
+// Focus or open the app at the notification's target URL on tap.
+self.addEventListener('notificationclick', (event: NotificationEvent) => {
+  event.notification.close()
+  const target = (event.notification.data?.url as string) || '/dashboard'
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window' }).then((clients) => {
+      for (const client of clients) {
+        if ('focus' in client) {
+          ;(client as WindowClient).navigate(target)
+          return (client as WindowClient).focus()
+        }
+      }
+      return self.clients.openWindow(target)
+    })
+  )
+})
+
 // Background sync for offline captures
 self.addEventListener('sync', (event: SyncEvent) => {
   if (event.tag === 'sync-captures') {

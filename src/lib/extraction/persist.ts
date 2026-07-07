@@ -21,6 +21,15 @@ export async function writeExtractionResults(
 ): Promise<void> {
   const supabase = createAdminClient()
 
+  // captured_at is the authoritative moment for any derived obligation or
+  // decision, regardless of when extraction ran. Fetched once, reused below.
+  const { data: eventRow } = await supabase
+    .from('events')
+    .select('captured_at')
+    .eq('id', eventId)
+    .single()
+  const capturedAt = eventRow?.captured_at ?? new Date().toISOString()
+
   // 1. Insert labels
   if (parsed.labels.length > 0) {
     const labelRows = parsed.labels.map((l) => ({
@@ -85,12 +94,7 @@ export async function writeExtractionResults(
   //     raised_at is set from the event's captured_at — that is the authoritative
   //     moment the obligation came into being, regardless of when extraction ran.
   if (parsed.actions && parsed.actions.length > 0) {
-    const { data: eventRow } = await supabase
-      .from('events')
-      .select('captured_at')
-      .eq('id', eventId)
-      .single()
-    const raisedAt = eventRow?.captured_at ?? new Date().toISOString()
+    const raisedAt = capturedAt
 
     const actionRows = parsed.actions.map((a) => ({
       user_id: userId,
@@ -126,6 +130,28 @@ export async function writeExtractionResults(
           count: insertedActions.length,
         },
       })
+    }
+  }
+
+  // 2c. Create a decision lifecycle row when this event was labelled a decision.
+  //     One row per decision-labelled event (unique on source_event_id), so a
+  //     re-extraction refreshes the statement without duplicating. Lifecycle
+  //     status is user-owned thereafter — never overwritten here.
+  if (parsed.labels.some((l) => l.label === 'decision')) {
+    const statement = parsed.timeline_headline || parsed.summary
+    const { error: decisionErr } = await supabase
+      .from('decisions')
+      .upsert(
+        {
+          user_id: userId,
+          source_event_id: eventId,
+          statement,
+          decided_at: capturedAt,
+        },
+        { onConflict: 'source_event_id', ignoreDuplicates: true }
+      )
+    if (decisionErr) {
+      console.error('[persist] Failed to upsert decision:', decisionErr)
     }
   }
 

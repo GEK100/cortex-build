@@ -197,6 +197,26 @@ export interface StakeholderSummary {
   last_contact_at: string | null
 }
 
+// ---- Week 4: decisions ----
+
+export type DecisionStatus = 'recorded' | 'implemented' | 'superseded' | 'reversed'
+
+export interface Decision {
+  id: string
+  user_id: string
+  source_event_id: string
+  statement: string
+  rationale: string | null
+  decided_by_entity_id: string | null
+  decided_at: string
+  status: DecisionStatus
+  superseded_by: string | null
+  is_deleted: boolean
+  deleted_at: string | null
+  created_at: string
+  updated_at: string
+}
+
 // ---- Week 3: chat, calendar, email, agents ----
 
 export interface CalendarEvent {
