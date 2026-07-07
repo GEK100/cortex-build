@@ -8,6 +8,21 @@ export const APP_NAME = 'Cortex'
 
 export const ALLOWED_EMAIL = 'gareth@ictusflow.com'
 
+/**
+ * Strict model tiering (build prompt §3.6):
+ *   - Haiku  — cheap classification / scan passes (gap-finder scan)
+ *   - Sonnet — structured extraction, chat, synthesis, meeting-prep
+ *   - Opus   — the weekly reviewer only (Sunday strategic pass)
+ * Never use a heavier tier where a lighter one will do.
+ */
+export const MODELS = {
+  haiku: 'claude-haiku-4-5-20251001',
+  sonnet: 'claude-sonnet-4-20250514',
+  opus: 'claude-opus-4-20250514',
+} as const
+
+export type ModelTier = keyof typeof MODELS
+
 export const LABEL_COLOURS: Record<string, string> = {
   rfi: 'bg-blue-100 text-blue-700 border-blue-200',
   tq: 'bg-teal-100 text-teal-700 border-teal-200',

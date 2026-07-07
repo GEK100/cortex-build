@@ -6,6 +6,7 @@ import {
   buildPhotoUserPrompt,
 } from './prompt'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { MODELS } from '@/lib/config'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -45,7 +46,7 @@ export async function runExtraction(
     .update({ extraction_status: 'processing' })
     .eq('id', eventId)
 
-  const model = 'claude-sonnet-4-20250514'
+  const model = MODELS.sonnet
   const startMs = Date.now()
 
   // Build messages based on event type

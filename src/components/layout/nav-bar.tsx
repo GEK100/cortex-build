@@ -2,15 +2,16 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Mic, List, Clock, Users, CheckSquare } from 'lucide-react'
+import { Mic, Clock, Users, CheckSquare, MessageSquare, LayoutDashboard } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { href: '/', label: 'Capture', icon: Mic },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/timeline', label: 'Timeline', icon: Clock },
   { href: '/actions', label: 'Actions', icon: CheckSquare },
   { href: '/stakeholders', label: 'People', icon: Users },
-  { href: '/events', label: 'Events', icon: List },
+  { href: '/chat', label: 'Chat', icon: MessageSquare },
 ]
 
 export function NavBar() {

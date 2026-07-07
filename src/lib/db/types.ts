@@ -197,6 +197,67 @@ export interface StakeholderSummary {
   last_contact_at: string | null
 }
 
+// ---- Week 3: chat, calendar, email, agents ----
+
+export interface CalendarEvent {
+  id: string
+  user_id: string
+  provider: string
+  external_id: string
+  calendar_id: string | null
+  summary: string | null
+  description: string | null
+  location: string | null
+  starts_at: string
+  ends_at: string | null
+  attendees: { email?: string; displayName?: string; responseStatus?: string }[]
+  html_link: string | null
+  context_event_id: string | null
+  prep_sent_at: string | null
+  is_cancelled: boolean
+  synced_at: string
+  created_at: string
+  updated_at: string
+}
+
+export type AgentKind = 'synthesiser' | 'gap_finder' | 'meeting_prep' | 'weekly_reviewer'
+
+export type AgentOutputKind =
+  | 'tomorrow_brief'
+  | 'gap_report'
+  | 'meeting_prep'
+  | 'weekly_review'
+
+export interface AgentOutput {
+  id: string
+  user_id: string
+  kind: AgentOutputKind
+  ref_key: string
+  ref_id: string | null
+  title: string | null
+  body: string
+  data: Record<string, unknown>
+  run_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+// A single chat turn. Conversation state is session-only in v1 (AD:
+// no persisted threads), so these types live only in request/response
+// payloads, never in a table.
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export type ChatMode = 'factual' | 'synthesis'
+
+export interface ChatCitation {
+  event_id: string
+  captured_at: string
+  headline: string
+}
+
 // Slim row returned by /api/timeline: only the fields the feed needs.
 export interface TimelineEvent {
   id: string
