@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { assertAuthorisedUser } from '@/lib/auth/guard'
 import { createEvent } from '@/lib/events/create'
+import { applyProjectFilter } from '@/lib/projects/query'
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,6 +13,7 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100)
     const offset = parseInt(searchParams.get('offset') || '0', 10)
     const eventType = searchParams.get('type')
+    const projectParam = searchParams.get('project_id')
 
     let query = supabase
       .from('events')
@@ -23,6 +25,7 @@ export async function GET(request: NextRequest) {
     if (eventType) {
       query = query.eq('event_type', eventType)
     }
+    query = applyProjectFilter(query, projectParam)
 
     const { data, error } = await query
 
@@ -45,6 +48,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const {
       event_type,
+      project_id,
       raw_content,
       audio_url,
       photo_url,
@@ -68,6 +72,7 @@ export async function POST(request: NextRequest) {
       user.id,
       {
         event_type,
+        project_id: project_id ?? null,
         raw_content,
         audio_url,
         photo_url,

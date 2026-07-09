@@ -32,10 +32,21 @@ export type Sentiment = 'positive' | 'negative' | 'neutral' | 'mixed'
 
 // ---- Table row types ----
 
+export interface Project {
+  id: string
+  user_id: string
+  name: string
+  colour: string | null
+  status: 'active' | 'archived'
+  created_at: string
+  updated_at: string
+}
+
 export interface Event {
   id: string
   user_id: string
   event_type: EventType
+  project_id: string | null
   created_at: string
   captured_at: string
   raw_content: string | null

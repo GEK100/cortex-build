@@ -1,8 +1,10 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ALLOWED_EMAIL, LABEL_COLOURS } from '@/lib/config'
 import { getDashboardData } from '@/lib/dashboard/build'
+import { ACTIVE_PROJECT_COOKIE, toFilterParam } from '@/lib/projects/util'
 import { UpcomingMeetings } from '@/components/calendar/upcoming-meetings'
 import { cn } from '@/lib/utils'
 
@@ -44,7 +46,8 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser()
   if (!user || user.email !== ALLOWED_EMAIL) redirect('/login')
 
-  const d = await getDashboardData(supabase)
+  const activeProject = cookies().get(ACTIVE_PROJECT_COOKIE)?.value ?? 'all'
+  const d = await getDashboardData(supabase, toFilterParam(activeProject))
 
   return (
     <main className="mx-auto max-w-3xl space-y-5 px-4 py-4">
@@ -52,6 +55,7 @@ export default async function DashboardPage() {
       <nav className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
         <Link href="/decisions" className="hover:text-foreground">Decisions</Link>
         <Link href="/outputs" className="hover:text-foreground">Outputs</Link>
+        <Link href="/projects" className="hover:text-foreground">Projects</Link>
         <Link href="/events" className="hover:text-foreground">All events</Link>
         <Link href="/search" className="hover:text-foreground">Search</Link>
       </nav>

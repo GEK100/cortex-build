@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { initSyncListener } from '@/lib/offline/sync'
+import { ProjectProvider } from '@/lib/projects/context'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -23,5 +24,5 @@ export function Providers({ children }: { children: React.ReactNode }) {
     initSyncListener()
   }, [])
 
-  return <>{children}</>
+  return <ProjectProvider>{children}</ProjectProvider>
 }

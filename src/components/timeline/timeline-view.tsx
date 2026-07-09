@@ -8,6 +8,7 @@ import {
   type DateRange,
 } from './timeline-filters'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useProjects } from '@/lib/projects/context'
 import type { LabelType, TimelineEvent } from '@/lib/db/types'
 
 const DATE_RANGE_DAYS: Record<DateRange, number | null> = {
@@ -56,6 +57,7 @@ export function TimelineView() {
     dateRange: '30d',
     labels: new Set<LabelType>(),
   })
+  const { filterParam } = useProjects()
 
   const fetchEvents = useCallback(async () => {
     const params = new URLSearchParams({
@@ -64,6 +66,7 @@ export function TimelineView() {
     })
     const from = fromParam(filters.dateRange)
     if (from) params.set('from', from)
+    if (filterParam) params.set('project_id', filterParam)
 
     try {
       const res = await fetch(`/api/timeline?${params.toString()}`)
@@ -76,7 +79,7 @@ export function TimelineView() {
     } finally {
       setLoading(false)
     }
-  }, [filters.minSignificance, filters.dateRange])
+  }, [filters.minSignificance, filters.dateRange, filterParam])
 
   useEffect(() => {
     setLoading(true)

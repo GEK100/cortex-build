@@ -6,6 +6,7 @@ interface CortexOfflineDB extends DBSchema {
     value: {
       id: string
       eventType: 'voice' | 'text' | 'photo'
+      projectId: string | null
       rawContent: string | null
       capturedAt: string
       audioBlob: ArrayBuffer | null

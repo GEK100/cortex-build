@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { assertAuthorisedUser } from '@/lib/auth/guard'
+import { applyProjectFilter } from '@/lib/projects/query'
 
 /**
  * Timeline feed: events flagged `timeline_worthy` by extraction.
@@ -50,6 +51,7 @@ export async function GET(request: NextRequest) {
 
     if (from) query = query.gte('captured_at', from)
     if (to) query = query.lte('captured_at', to)
+    query = applyProjectFilter(query, searchParams.get('project_id'))
 
     const { data, error } = await query
     if (error) {

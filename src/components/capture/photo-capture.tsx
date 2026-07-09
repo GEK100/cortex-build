@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button'
 import { useRecorder } from '@/lib/hooks/use-recorder'
 import { RecordingIndicator } from './recording-indicator'
 import { transcribeAudio } from '@/lib/media/transcribe'
+import { useProjects } from '@/lib/projects/context'
 import { toast } from 'sonner'
 
 export function PhotoCapture() {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { captureProjectId } = useProjects()
   const [preview, setPreview] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [caption, setCaption] = useState<string | null>(null)
@@ -66,6 +68,7 @@ export function PhotoCapture() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event_type: 'photo',
+          project_id: captureProjectId,
           raw_content: caption,
           photo_url: uploadData.path,
           photo_caption_raw: caption,

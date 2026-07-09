@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid'
 
 export interface PendingCapture {
   eventType: 'voice' | 'text' | 'photo'
+  projectId?: string | null
   rawContent: string | null
   audioBlob?: ArrayBuffer
   photoBlob?: ArrayBuffer
@@ -20,6 +21,7 @@ export async function enqueueCapture(capture: PendingCapture): Promise<string> {
   await db.put('pendingEvents', {
     id,
     eventType: capture.eventType,
+    projectId: capture.projectId ?? null,
     rawContent: capture.rawContent,
     capturedAt: new Date().toISOString(),
     audioBlob: capture.audioBlob || null,
@@ -97,6 +99,7 @@ export async function flushQueue(): Promise<{ synced: number; failed: number }> 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event_type: item.eventType,
+          project_id: item.projectId ?? null,
           raw_content: rawContent,
           offline_id: item.id,
           captured_at: item.capturedAt,

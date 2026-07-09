@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Settings, Search } from 'lucide-react'
 import { APP_NAME } from '@/lib/config'
 import { useOnlineStatus } from '@/lib/hooks/use-online-status'
+import { ProjectSwitcher } from '@/components/projects/project-switcher'
 
 export function AppHeader() {
   const isOnline = useOnlineStatus()
@@ -14,6 +15,7 @@ export function AppHeader() {
         {APP_NAME}
       </span>
       <div className="flex items-center gap-3">
+        <ProjectSwitcher />
         <span
           className={`h-2 w-2 rounded-full ${
             isOnline ? 'bg-green-500' : 'bg-amber-500'

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { assertAuthorisedUser } from '@/lib/auth/guard'
 import { embedText } from '@/lib/search/embed'
+import { applyProjectFilter } from '@/lib/projects/query'
 
 /**
  * Hybrid search across the event graph (build prompt view 6). Keyword (ilike)
@@ -13,38 +14,63 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient()
     await assertAuthorisedUser(supabase)
 
-    const q = (new URL(request.url).searchParams.get('q') || '').trim()
+    const searchParams = new URL(request.url).searchParams
+    const q = (searchParams.get('q') || '').trim()
     if (!q) return NextResponse.json({ events: [], actions: [], entities: [], decisions: [] })
+    // Project scope: null = all, 'none' = General, <uuid> = a project. Applies to
+    // events, and to actions/decisions via their source event's project. Entities
+    // are cross-project by nature (a person spans sites) so stay unscoped.
+    const projectParam = searchParams.get('project_id')
 
     // Sanitise for the PostgREST `or` filter grammar (commas/parens are control chars).
     const safe = q.replace(/[(),]/g, ' ').trim()
     const like = `%${safe}%`
 
+    // actions/decisions embed events!inner(project_id) only when scoping, so the
+    // unscoped response shape is unchanged.
+    const actionSelect: string = projectParam
+      ? 'id, description, status, source_kind, due_at, source_event_id, events!inner(project_id)'
+      : 'id, description, status, source_kind, due_at, source_event_id'
+    const decisionSelect: string = projectParam
+      ? 'id, statement, status, decided_at, source_event_id, events!inner(project_id)'
+      : 'id, statement, status, decided_at, source_event_id'
+
     const [eventKeyword, actionsRes, entitiesRes, decisionsRes, embedding] = await Promise.all([
-      supabase
-        .from('events')
-        .select('id, captured_at, event_type, raw_content, edited_content, ocr_text, event_labels(label), extraction_results(timeline_headline, parsed_result)')
-        .eq('is_deleted', false)
-        .or(`raw_content.ilike.${like},edited_content.ilike.${like},ocr_text.ilike.${like}`)
-        .order('captured_at', { ascending: false })
-        .limit(30),
-      supabase
-        .from('actions')
-        .select('id, description, status, source_kind, due_at, source_event_id')
-        .eq('is_deleted', false)
-        .ilike('description', like)
-        .limit(20),
+      applyProjectFilter(
+        supabase
+          .from('events')
+          .select('id, captured_at, event_type, raw_content, edited_content, ocr_text, event_labels(label), extraction_results(timeline_headline, parsed_result)')
+          .eq('is_deleted', false)
+          .or(`raw_content.ilike.${like},edited_content.ilike.${like},ocr_text.ilike.${like}`)
+          .order('captured_at', { ascending: false })
+          .limit(30),
+        projectParam
+      ),
+      applyProjectFilter(
+        supabase
+          .from('actions')
+          .select(actionSelect)
+          .eq('is_deleted', false)
+          .ilike('description', like)
+          .limit(20),
+        projectParam,
+        'events.project_id'
+      ),
       supabase
         .from('entities')
         .select('id, canonical_name, entity_type')
         .ilike('canonical_name', like)
         .limit(20),
-      supabase
-        .from('decisions')
-        .select('id, statement, status, decided_at, source_event_id')
-        .eq('is_deleted', false)
-        .ilike('statement', like)
-        .limit(20),
+      applyProjectFilter(
+        supabase
+          .from('decisions')
+          .select(decisionSelect)
+          .eq('is_deleted', false)
+          .ilike('statement', like)
+          .limit(20),
+        projectParam,
+        'events.project_id'
+      ),
       embedText(q),
     ])
 
@@ -59,6 +85,8 @@ export async function GET(request: NextRequest) {
         query_embedding: embedding,
         match_count: 20,
         similarity_threshold: 0.2,
+        filter_project: projectParam && projectParam !== 'none' ? projectParam : null,
+        filter_general: projectParam === 'none',
       })
       const ids = ((matches ?? []) as { id: string; similarity: number }[]).filter(
         (m) => !eventMap.has(m.id)

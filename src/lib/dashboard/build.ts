@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { applyProjectFilter } from '@/lib/projects/query'
 
 export interface DashboardData {
   health: {
@@ -23,8 +24,21 @@ type ContactJoin = { events: { captured_at: string; is_deleted: boolean } | null
  * Everything here is derived — the dashboard is never manually edited. Single-
  * user, low volume, so aggregation happens in JS rather than SQL views.
  */
-export async function getDashboardData(supabase: SupabaseClient): Promise<DashboardData> {
+export async function getDashboardData(
+  supabase: SupabaseClient,
+  projectParam: string | null = null
+): Promise<DashboardData> {
   const nowIso = new Date().toISOString()
+
+  // Health/timeline scope to the active project via each row's source event.
+  // Stakeholders and trade packages stay global — an entity (a person, a trade)
+  // is cross-project by nature, so scoping them to one site is misleading.
+  // Typed as plain string so Supabase's select parser stays generic (the
+  // conditional embed is not a literal it can resolve).
+  const actionsSelect: string = projectParam
+    ? 'status, source_kind, due_at, events!inner(project_id)'
+    : 'status, source_kind, due_at'
+  const decisionsSelect: string = projectParam ? 'id, events!inner(project_id)' : 'id'
 
   const [
     actionsRes,
@@ -37,22 +51,38 @@ export async function getDashboardData(supabase: SupabaseClient): Promise<Dashbo
     briefRes,
     driftRes,
   ] = await Promise.all([
-    supabase.from('actions').select('status, source_kind, due_at').eq('is_deleted', false),
-    supabase
-      .from('event_labels')
-      .select('event_id, events!inner(is_deleted)', { count: 'exact', head: true })
-      .eq('label', 'risk')
-      .eq('events.is_deleted', false),
-    supabase
-      .from('event_labels')
-      .select('event_id, events!inner(is_deleted)', { count: 'exact', head: true })
-      .eq('label', 'snag')
-      .eq('events.is_deleted', false),
-    supabase
-      .from('decisions')
-      .select('id', { count: 'exact', head: true })
-      .eq('is_deleted', false)
-      .eq('status', 'recorded'),
+    applyProjectFilter(
+      supabase.from('actions').select(actionsSelect).eq('is_deleted', false),
+      projectParam,
+      'events.project_id'
+    ),
+    applyProjectFilter(
+      supabase
+        .from('event_labels')
+        .select('event_id, events!inner(is_deleted)', { count: 'exact', head: true })
+        .eq('label', 'risk')
+        .eq('events.is_deleted', false),
+      projectParam,
+      'events.project_id'
+    ),
+    applyProjectFilter(
+      supabase
+        .from('event_labels')
+        .select('event_id, events!inner(is_deleted)', { count: 'exact', head: true })
+        .eq('label', 'snag')
+        .eq('events.is_deleted', false),
+      projectParam,
+      'events.project_id'
+    ),
+    applyProjectFilter(
+      supabase
+        .from('decisions')
+        .select(decisionsSelect, { count: 'exact', head: true })
+        .eq('is_deleted', false)
+        .eq('status', 'recorded'),
+      projectParam,
+      'events.project_id'
+    ),
     supabase
       .from('entities')
       .select('id, canonical_name, entity_type, event_entities(events(captured_at, is_deleted))')
@@ -61,14 +91,17 @@ export async function getDashboardData(supabase: SupabaseClient): Promise<Dashbo
       .from('entities')
       .select('canonical_name, event_entities(events(is_deleted, event_labels(label)))')
       .eq('entity_type', 'trade_package'),
-    supabase
-      .from('events')
-      .select('id, captured_at, event_labels(label), extraction_results!inner(timeline_headline, timeline_worthy, significance)')
-      .eq('is_deleted', false)
-      .eq('extraction_results.timeline_worthy', true)
-      .gte('extraction_results.significance', 3)
-      .order('captured_at', { ascending: false })
-      .limit(8),
+    applyProjectFilter(
+      supabase
+        .from('events')
+        .select('id, captured_at, event_labels(label), extraction_results!inner(timeline_headline, timeline_worthy, significance)')
+        .eq('is_deleted', false)
+        .eq('extraction_results.timeline_worthy', true)
+        .gte('extraction_results.significance', 3)
+        .order('captured_at', { ascending: false })
+        .limit(8),
+      projectParam
+    ),
     supabase
       .from('agent_outputs')
       .select('body, created_at, data')
@@ -90,7 +123,7 @@ export async function getDashboardData(supabase: SupabaseClient): Promise<Dashbo
   let actionsOverdue = 0
   let rfisOpen = 0
   for (const a of actionsRes.data ?? []) {
-    const row = a as { status: string; source_kind: string; due_at: string | null }
+    const row = a as unknown as { status: string; source_kind: string; due_at: string | null }
     if (row.status === 'open') {
       actionsOpen++
       if (row.due_at && row.due_at < nowIso) actionsOverdue++

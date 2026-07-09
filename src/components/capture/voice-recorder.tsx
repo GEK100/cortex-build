@@ -8,12 +8,14 @@ import { useRecorder } from '@/lib/hooks/use-recorder'
 import { useOnlineStatus } from '@/lib/hooks/use-online-status'
 import { transcribeAudio } from '@/lib/media/transcribe'
 import { enqueueCapture } from '@/lib/offline/queue'
+import { useProjects } from '@/lib/projects/context'
 import { toast } from 'sonner'
 
 export function VoiceRecorder() {
   const { isRecording, duration, start, stop } = useRecorder()
   const [processing, setProcessing] = useState(false)
   const isOnline = useOnlineStatus()
+  const { captureProjectId } = useProjects()
 
   async function handleToggle() {
     if (isRecording) {
@@ -43,6 +45,7 @@ export function VoiceRecorder() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               event_type: 'voice',
+              project_id: captureProjectId,
               raw_content: transcript,
               audio_url: uploadData?.path || null,
               audio_duration_seconds: Math.round(durationSeconds),
@@ -57,6 +60,7 @@ export function VoiceRecorder() {
           const arrayBuffer = await blob.arrayBuffer()
           await enqueueCapture({
             eventType: 'voice',
+            projectId: captureProjectId,
             rawContent: null,
             audioBlob: arrayBuffer,
           })

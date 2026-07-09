@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { LABEL_COLOURS } from '@/lib/config'
+import { useProjects } from '@/lib/projects/context'
 
 interface EventHit {
   id: string
@@ -30,6 +31,7 @@ export function SearchView() {
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { filterParam } = useProjects()
 
   const run = useCallback(async (q: string) => {
     if (!q.trim()) {
@@ -39,13 +41,15 @@ export function SearchView() {
     }
     setLoading(true)
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`)
+      const params = new URLSearchParams({ q })
+      if (filterParam) params.set('project_id', filterParam)
+      const res = await fetch(`/api/search?${params.toString()}`)
       if (res.ok) setResults(await res.json())
       setSearched(true)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [filterParam])
 
   function onChange(v: string) {
     setQuery(v)

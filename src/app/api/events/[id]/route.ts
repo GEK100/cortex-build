@@ -58,6 +58,8 @@ export async function PATCH(
     const updates: Record<string, unknown> = {}
     if ('edited_content' in body) updates.edited_content = body.edited_content
     if ('photo_caption_edited' in body) updates.photo_caption_edited = body.photo_caption_edited
+    // Reassign to a project, or null to move back to General.
+    if ('project_id' in body) updates.project_id = body.project_id || null
     if ('is_deleted' in body) {
       updates.is_deleted = body.is_deleted
       updates.deleted_at = body.is_deleted ? new Date().toISOString() : null

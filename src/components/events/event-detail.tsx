@@ -7,6 +7,7 @@ import { LabelBadge } from './label-badge'
 import { EntityChip } from './entity-chip'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
+import { useProjects } from '@/lib/projects/context'
 import type { EventWithExtraction } from '@/lib/db/types'
 
 interface EventDetailProps {
@@ -34,6 +35,26 @@ function formatDateTime(dateStr: string) {
 export function EventDetail({ eventId }: EventDetailProps) {
   const [event, setEvent] = useState<EventWithExtraction | null>(null)
   const [loading, setLoading] = useState(true)
+  const [savingProject, setSavingProject] = useState(false)
+  const { projects } = useProjects()
+
+  async function reassignProject(value: string) {
+    const projectId = value === 'general' ? null : value
+    setSavingProject(true)
+    try {
+      const res = await fetch(`/api/events/${eventId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project_id: projectId }),
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setEvent((prev) => (prev ? { ...prev, project_id: updated.project_id } : prev))
+      }
+    } finally {
+      setSavingProject(false)
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -92,6 +113,30 @@ export function EventDetail({ eventId }: EventDetailProps) {
         <span className="text-xs text-muted-foreground">
           {formatDateTime(event.captured_at)}
         </span>
+      </div>
+
+      {/* Project — reassign the note to a different space */}
+      <div className="mt-3 flex items-center gap-2">
+        <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+          Project
+        </span>
+        <select
+          value={event.project_id ?? 'general'}
+          onChange={(e) => reassignProject(e.target.value)}
+          disabled={savingProject}
+          aria-label="Project"
+          className="cursor-pointer rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-60"
+        >
+          <option value="general">General</option>
+          {event.project_id && !projects.some((p) => p.id === event.project_id) && (
+            <option value={event.project_id}>(archived project)</option>
+          )}
+          {projects.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Content */}

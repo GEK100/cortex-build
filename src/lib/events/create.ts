@@ -5,6 +5,7 @@ import type { Event, EventType } from '@/lib/db/types'
 
 export interface CreateEventInput {
   event_type: EventType
+  project_id?: string | null
   raw_content?: string | null
   audio_url?: string | null
   photo_url?: string | null
@@ -73,6 +74,7 @@ export async function createEvent(
     .insert({
       user_id: userId,
       event_type: input.event_type,
+      project_id: input.project_id ?? null,
       raw_content: input.raw_content ?? null,
       audio_url: input.audio_url ?? null,
       photo_url: input.photo_url ?? null,

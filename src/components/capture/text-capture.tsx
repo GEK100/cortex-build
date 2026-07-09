@@ -7,11 +7,13 @@ import { Send } from 'lucide-react'
 import { toast } from 'sonner'
 import { useOnlineStatus } from '@/lib/hooks/use-online-status'
 import { enqueueCapture } from '@/lib/offline/queue'
+import { useProjects } from '@/lib/projects/context'
 
 export function TextCapture() {
   const [content, setContent] = useState('')
   const [saving, setSaving] = useState(false)
   const isOnline = useOnlineStatus()
+  const { captureProjectId } = useProjects()
 
   async function handleSubmit() {
     const text = content.trim()
@@ -25,6 +27,7 @@ export function TextCapture() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             event_type: 'text',
+            project_id: captureProjectId,
             raw_content: text,
           }),
         })
@@ -35,6 +38,7 @@ export function TextCapture() {
       } else {
         await enqueueCapture({
           eventType: 'text',
+          projectId: captureProjectId,
           rawContent: text,
         })
         toast.success('Captured offline — will sync when reconnected')

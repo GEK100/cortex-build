@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { EventCard } from './event-card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useProjects } from '@/lib/projects/context'
 import type { Event, EventLabel } from '@/lib/db/types'
 
 type EventWithLabels = Event & { event_labels: EventLabel[] }
@@ -10,10 +11,14 @@ type EventWithLabels = Event & { event_labels: EventLabel[] }
 export function EventList() {
   const [events, setEvents] = useState<EventWithLabels[]>([])
   const [loading, setLoading] = useState(true)
+  const { filterParam } = useProjects()
 
   const fetchEvents = useCallback(async () => {
     try {
-      const res = await fetch('/api/events')
+      const url = filterParam
+        ? `/api/events?project_id=${encodeURIComponent(filterParam)}`
+        : '/api/events'
+      const res = await fetch(url)
       if (res.ok) {
         const data = await res.json()
         setEvents(data)
@@ -23,9 +28,10 @@ export function EventList() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [filterParam])
 
   useEffect(() => {
+    setLoading(true)
     fetchEvents()
 
     // Poll every 10 seconds for fresh data (extraction results may arrive)
