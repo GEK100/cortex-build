@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { writeAuditLog } from '@/lib/audit/log'
+import { embedText } from '@/lib/search/embed'
 import type { ExtractionResult } from './ontology'
 
 /**
@@ -22,10 +23,11 @@ export async function writeExtractionResults(
   const supabase = createAdminClient()
 
   // captured_at is the authoritative moment for any derived obligation or
-  // decision, regardless of when extraction ran. Fetched once, reused below.
+  // decision, regardless of when extraction ran. Content fields are fetched
+  // here too so we can build the search embedding without a second round-trip.
   const { data: eventRow } = await supabase
     .from('events')
-    .select('captured_at')
+    .select('captured_at, raw_content, edited_content, ocr_text')
     .eq('id', eventId)
     .single()
   const capturedAt = eventRow?.captured_at ?? new Date().toISOString()
@@ -185,6 +187,21 @@ export async function writeExtractionResults(
   if (parsed.corrected_content) {
     eventUpdate.edited_content = parsed.corrected_content
   }
+
+  // Search embedding (Week 5): built from the summary, entities and the raw
+  // content — covering transcripts, emails and OCR'd text. Best-effort: a null
+  // embedding just means this event falls back to keyword search.
+  const embeddingInput = [
+    parsed.summary,
+    parsed.timeline_headline ?? '',
+    parsed.entities.map((e) => e.name).join(', '),
+    eventRow?.edited_content || eventRow?.raw_content || '',
+    eventRow?.ocr_text || '',
+  ]
+    .filter(Boolean)
+    .join('\n')
+  const embedding = await embedText(embeddingInput)
+  if (embedding) eventUpdate.embedding = embedding
 
   await supabase
     .from('events')

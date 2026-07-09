@@ -23,10 +23,7 @@ type ContactJoin = { events: { captured_at: string; is_deleted: boolean } | null
  * Everything here is derived — the dashboard is never manually edited. Single-
  * user, low volume, so aggregation happens in JS rather than SQL views.
  */
-export async function getDashboardData(
-  supabase: SupabaseClient,
-  userId: string
-): Promise<DashboardData> {
+export async function getDashboardData(supabase: SupabaseClient): Promise<DashboardData> {
   const nowIso = new Date().toISOString()
 
   const [

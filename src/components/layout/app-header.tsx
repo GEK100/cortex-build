@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Settings } from 'lucide-react'
+import { Settings, Search } from 'lucide-react'
 import { APP_NAME } from '@/lib/config'
 import { useOnlineStatus } from '@/lib/hooks/use-online-status'
 
@@ -20,6 +20,13 @@ export function AppHeader() {
           }`}
           title={isOnline ? 'Online' : 'Offline'}
         />
+        <Link
+          href="/search"
+          className="text-muted-foreground hover:text-foreground"
+          aria-label="Search"
+        >
+          <Search className="h-4 w-4" />
+        </Link>
         <Link
           href="/settings"
           className="text-muted-foreground hover:text-foreground"

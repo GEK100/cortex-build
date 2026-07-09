@@ -44,10 +44,18 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser()
   if (!user || user.email !== ALLOWED_EMAIL) redirect('/login')
 
-  const d = await getDashboardData(supabase, user.id)
+  const d = await getDashboardData(supabase)
 
   return (
     <main className="mx-auto max-w-3xl space-y-5 px-4 py-4">
+      {/* Secondary navigation to the less-frequent views */}
+      <nav className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <Link href="/decisions" className="hover:text-foreground">Decisions</Link>
+        <Link href="/outputs" className="hover:text-foreground">Outputs</Link>
+        <Link href="/events" className="hover:text-foreground">All events</Link>
+        <Link href="/search" className="hover:text-foreground">Search</Link>
+      </nav>
+
       {/* Morning brief */}
       <section>
         <h2 className="mb-2 text-lg font-medium tracking-tight">Today</h2>
