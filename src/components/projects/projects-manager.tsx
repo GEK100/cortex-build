@@ -86,13 +86,7 @@ export function ProjectsManager() {
   const archived = projects.filter((p) => p.status === 'archived')
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-4">
-      <p className="mb-4 text-xs text-muted-foreground">
-        Projects are spaces to split your notes. Notes with no project live in{' '}
-        <span className="font-medium text-foreground">General</span>. Pick the active project from the
-        header — new captures are filed there.
-      </p>
-
+    <div>
       {/* Create */}
       <div className="mb-6 flex gap-2">
         <Input

@@ -129,7 +129,7 @@ export function TimelineView() {
         <div className="mx-auto max-w-2xl">
           {grouped.map(([key, items]) => (
             <section key={key}>
-              <h3 className="sticky top-12 z-10 border-b border-border bg-background/95 px-4 py-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground backdrop-blur-sm">
+              <h3 className="sticky top-14 z-10 mb-1 border-b border-border bg-background/80 px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-wider text-primary backdrop-blur-md">
                 {formatDayHeader(items[0].captured_at)}
               </h3>
               {items.map((event) => (

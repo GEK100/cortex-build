@@ -62,7 +62,7 @@ export function TimelineFilters({ state, onChange }: TimelineFiltersProps) {
               className={cn(
                 'rounded-sm px-1.5 py-0.5 transition-colors',
                 state.dateRange === value
-                  ? 'bg-foreground text-background'
+                  ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -82,7 +82,7 @@ export function TimelineFilters({ state, onChange }: TimelineFiltersProps) {
               className={cn(
                 'w-5 rounded-sm py-0.5 text-center tabular-nums transition-colors',
                 state.minSignificance === n
-                  ? 'bg-foreground text-background'
+                  ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -98,7 +98,7 @@ export function TimelineFilters({ state, onChange }: TimelineFiltersProps) {
           className={cn(
             'rounded-sm border px-2 py-0.5 text-[10px] transition-colors',
             state.labels.size === 0
-              ? 'border-foreground bg-foreground text-background'
+              ? 'border-primary bg-primary text-primary-foreground'
               : 'border-border text-muted-foreground hover:text-foreground'
           )}
         >

@@ -1,12 +1,11 @@
 import { StakeholderList } from '@/components/stakeholders/stakeholder-list'
+import { PageHeader, PageShell } from '@/components/layout/page-header'
 
 export default function StakeholdersPage() {
   return (
-    <main>
-      <div className="border-b border-border px-4 py-3">
-        <h2 className="text-lg font-medium tracking-tight">Stakeholders</h2>
-      </div>
+    <PageShell>
+      <PageHeader eyebrow="Who's involved" title="People" subtitle="Everyone on your projects and when you last spoke." />
       <StakeholderList />
-    </main>
+    </PageShell>
   )
 }

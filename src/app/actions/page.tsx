@@ -1,12 +1,11 @@
 import { ActionList } from '@/components/actions/action-list'
+import { PageHeader, PageShell } from '@/components/layout/page-header'
 
 export default function ActionsPage() {
   return (
-    <main>
-      <div className="border-b border-border px-4 py-3">
-        <h2 className="text-lg font-medium tracking-tight">Actions</h2>
-      </div>
+    <PageShell>
+      <PageHeader eyebrow="Open loops" title="Actions" subtitle="Commitments, RFIs and TQs — what's owed and by whom." />
       <ActionList />
-    </main>
+    </PageShell>
   )
 }

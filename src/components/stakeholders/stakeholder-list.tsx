@@ -97,10 +97,10 @@ export function StakeholderList() {
               key={value}
               onClick={() => setTypeFilter(value)}
               className={cn(
-                'rounded-sm px-2 py-0.5 transition-colors',
+                'rounded-md px-2.5 py-1 font-medium transition-colors',
                 typeFilter === value
-                  ? 'bg-foreground text-background'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
               )}
             >
               {label}

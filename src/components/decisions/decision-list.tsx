@@ -76,7 +76,7 @@ export function DecisionList() {
               onClick={() => setFilter(s)}
               className={cn(
                 'rounded-sm px-2 py-0.5 capitalize transition-colors',
-                filter === s ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'
+                filter === s ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
               )}
             >
               {s}

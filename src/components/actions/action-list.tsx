@@ -114,7 +114,7 @@ export function ActionList() {
               className={cn(
                 'rounded-sm px-2 py-0.5 transition-colors',
                 status === value
-                  ? 'bg-foreground text-background'
+                  ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -130,7 +130,7 @@ export function ActionList() {
               className={cn(
                 'rounded-sm border px-2 py-0.5 transition-colors',
                 sourceKind === value
-                  ? 'border-foreground bg-foreground text-background'
+                  ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-border text-muted-foreground hover:text-foreground'
               )}
             >

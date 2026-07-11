@@ -168,7 +168,7 @@ export function ChatPanel({ scope }: { scope?: ChatScope }) {
   }, [isRecording, start, stop])
 
   return (
-    <div className="flex h-[calc(100vh-6.5rem)] flex-col">
+    <div className="flex h-[calc(100dvh-11rem)] flex-col md:h-[calc(100dvh-7.5rem)]">
       <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
         {turns.length === 0 && (
           <div className="mx-auto max-w-md pt-10 text-center text-sm text-muted-foreground">
@@ -188,10 +188,10 @@ export function ChatPanel({ scope }: { scope?: ChatScope }) {
           >
             <div
               className={cn(
-                'inline-block whitespace-pre-wrap rounded-lg px-3 py-2 text-left',
+                'inline-block max-w-[85%] whitespace-pre-wrap rounded-xl px-3.5 py-2.5 text-left shadow-xs',
                 turn.role === 'user'
-                  ? 'bg-foreground text-background'
-                  : 'bg-muted/40 text-foreground'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'border border-border bg-card text-foreground'
               )}
             >
               {turn.role === 'assistant'
@@ -213,7 +213,7 @@ export function ChatPanel({ scope }: { scope?: ChatScope }) {
         ))}
       </div>
 
-      <div className="border-t border-border bg-background px-4 py-3">
+      <div className="border-t border-border bg-card/60 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-2xl items-end gap-2">
           <Button
             type="button"

@@ -1,12 +1,11 @@
 import { ProjectsManager } from '@/components/projects/projects-manager'
+import { PageHeader, PageShell } from '@/components/layout/page-header'
 
 export default function ProjectsPage() {
   return (
-    <main>
-      <div className="border-b border-border px-4 py-3">
-        <h2 className="text-lg font-medium tracking-tight">Projects</h2>
-      </div>
+    <PageShell size="narrow">
+      <PageHeader eyebrow="Your spaces" title="Projects" subtitle="Split captures across sites. Notes with no project live in General." />
       <ProjectsManager />
-    </main>
+    </PageShell>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from 'react'
 import Link from 'next/link'
+import { Search as SearchIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LABEL_COLOURS } from '@/lib/config'
 import { useProjects } from '@/lib/projects/context'
@@ -62,20 +63,23 @@ export function SearchView() {
 
   return (
     <div>
-      <div className="border-b border-border px-4 py-3">
-        <input
-          autoFocus
-          value={query}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Search events, people, actions, decisions…"
-          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-        />
+      <div className="mb-5">
+        <div className="relative">
+          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            autoFocus
+            value={query}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Search events, people, actions, decisions…"
+            className="h-11 w-full rounded-lg border border-input bg-card pl-9 pr-3 text-sm shadow-xs focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background"
+          />
+        </div>
         {results.semantic === false && searched && (
-          <p className="mt-1 text-[10px] text-muted-foreground">Keyword only — semantic index unavailable.</p>
+          <p className="mt-1.5 text-[10px] text-muted-foreground">Keyword only — semantic index unavailable.</p>
         )}
       </div>
 
-      <div className="mx-auto max-w-2xl px-4 py-3">
+      <div>
         {loading && <p className="text-sm text-muted-foreground">Searching…</p>}
         {!loading && searched && total === 0 && (
           <p className="text-sm text-muted-foreground">Nothing found for &ldquo;{query}&rdquo;.</p>

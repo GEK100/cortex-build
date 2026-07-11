@@ -1,12 +1,11 @@
 import { DecisionList } from '@/components/decisions/decision-list'
+import { PageHeader, PageShell } from '@/components/layout/page-header'
 
 export default function DecisionsPage() {
   return (
-    <main>
-      <div className="border-b border-border px-4 py-3">
-        <h2 className="text-lg font-medium tracking-tight">Decisions</h2>
-      </div>
+    <PageShell>
+      <PageHeader eyebrow="On the record" title="Decisions" subtitle="Every decision, who made it, and when." />
       <DecisionList />
-    </main>
+    </PageShell>
   )
 }
