@@ -1,16 +1,24 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google'
 import './globals.css'
 import { APP_NAME } from '@/lib/config'
 import { AppHeader } from '@/components/layout/app-header'
 import { NavBar } from '@/components/layout/nav-bar'
+import { Sidebar } from '@/components/layout/sidebar'
 import { OfflineBanner } from '@/components/layout/offline-banner'
 import { Toaster } from '@/components/ui/sonner'
 import { Providers } from '@/components/providers'
 
-const inter = Inter({
+const sans = IBM_Plex_Sans({
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-sans',
+})
+
+const mono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-mono',
 })
 
 export const metadata: Metadata = {
@@ -25,7 +33,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#3D4A5C',
+  themeColor: '#1b3358',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -39,11 +47,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-GB">
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${sans.variable} ${mono.variable} font-sans antialiased`}>
         <Providers>
-          <AppHeader />
-          <OfflineBanner />
-          <div className="pt-12 pb-14">{children}</div>
+          {/* Desktop: persistent left rail. Mobile: hidden (bottom nav instead). */}
+          <Sidebar />
+
+          {/* Content column, offset by the sidebar on desktop. */}
+          <div className="flex min-h-screen flex-col md:pl-[15rem]">
+            <AppHeader />
+            <OfflineBanner />
+            <div className="flex-1 pb-20 md:pb-10">{children}</div>
+          </div>
+
+          {/* Mobile bottom nav. */}
           <NavBar />
           <Toaster position="top-center" />
         </Providers>

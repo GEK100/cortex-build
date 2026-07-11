@@ -83,31 +83,33 @@ export function VoiceRecorder() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 py-6">
+    <div className="flex flex-col items-center gap-5 py-8">
       {isRecording && <RecordingIndicator duration={duration} />}
 
-      <Button
-        onClick={handleToggle}
-        disabled={processing}
-        variant={isRecording ? 'destructive' : 'default'}
-        size="lg"
-        className="h-16 w-16 rounded-full p-0"
-      >
-        {isRecording ? (
-          <Square className="h-6 w-6" />
-        ) : processing ? (
-          <span className="text-xs">...</span>
-        ) : (
-          <Mic className="h-6 w-6" />
+      <div className="relative">
+        {isRecording && (
+          <span className="absolute inset-0 animate-ping rounded-full bg-destructive/30" />
         )}
-      </Button>
+        <Button
+          onClick={handleToggle}
+          disabled={processing}
+          variant={isRecording ? 'destructive' : 'default'}
+          size="lg"
+          className="relative h-20 w-20 rounded-full p-0 shadow-float ring-4 ring-primary/10 data-[recording=true]:ring-destructive/15"
+          data-recording={isRecording}
+        >
+          {isRecording ? (
+            <Square className="h-7 w-7" />
+          ) : processing ? (
+            <span className="text-xs">…</span>
+          ) : (
+            <Mic className="h-7 w-7" />
+          )}
+        </Button>
+      </div>
 
-      <p className="text-xs text-muted-foreground">
-        {processing
-          ? 'Processing...'
-          : isRecording
-            ? 'Tap to stop'
-            : 'Tap to record'}
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {processing ? 'Processing…' : isRecording ? 'Tap to stop' : 'Tap to record'}
       </p>
     </div>
   )

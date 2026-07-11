@@ -2,38 +2,28 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Mic, Clock, Users, CheckSquare, MessageSquare, LayoutDashboard } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { PRIMARY_NAV, isActive } from './nav-items'
 
-const navItems = [
-  { href: '/', label: 'Capture', icon: Mic },
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/timeline', label: 'Timeline', icon: Clock },
-  { href: '/actions', label: 'Actions', icon: CheckSquare },
-  { href: '/stakeholders', label: 'People', icon: Users },
-  { href: '/chat', label: 'Chat', icon: MessageSquare },
-]
-
+/** Mobile bottom nav — hidden on desktop (the sidebar takes over). */
 export function NavBar() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-14 items-center justify-around border-t border-border bg-background/95 backdrop-blur-sm">
-      {navItems.map(({ href, label, icon: Icon }) => {
-        const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href)
-
+    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-stretch justify-around border-t border-border bg-card/90 backdrop-blur-md md:hidden">
+      {PRIMARY_NAV.map(({ href, label, icon: Icon }) => {
+        const active = isActive(pathname, href)
         return (
           <Link
             key={href}
             href={href}
             className={cn(
-              'flex flex-col items-center gap-0.5 px-4 py-1 text-xs transition-colors',
-              isActive
-                ? 'font-medium text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+              'relative flex flex-1 flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors',
+              active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            <Icon className="h-5 w-5" strokeWidth={isActive ? 2 : 1.5} />
+            {active && <span className="absolute top-0 h-0.5 w-8 rounded-full bg-primary" />}
+            <Icon className="h-5 w-5" strokeWidth={active ? 2.2 : 1.8} />
             <span>{label}</span>
           </Link>
         )

@@ -4,33 +4,91 @@
 
 @layer base {
   :root {
-    /* Cortex: warm, quiet, Tufte-dense palette */
-    --background: 40, 20%, 98%;
-    --foreground: 20, 10%, 12%;
-    --card: 40, 15%, 99%;
-    --card-foreground: 20, 10%, 12%;
-    --popover: 40, 15%, 99%;
-    --popover-foreground: 20, 10%, 12%;
-    --primary: 220, 20%, 30%;
-    --primary-foreground: 40, 20%, 98%;
-    --secondary: 40, 10%, 95%;
-    --secondary-foreground: 20, 10%, 18%;
-    --muted: 40, 8%, 94%;
-    --muted-foreground: 20, 8%, 40%;
-    --accent: 40, 8%, 94%;
-    --accent-foreground: 20, 10%, 18%;
-    --destructive: 0, 60%, 45%;
-    --destructive-foreground: 0, 0%, 100%;
-    --border: 40, 8%, 88%;
-    --input: 40, 8%, 88%;
-    --ring: 220, 20%, 40%;
-    --radius: 0.375rem;
+    /* ============================================================
+       Cortex — "Site Intelligence Console"
+       Cool slate-neutral enterprise palette, blueprint-blue primary.
+       Data-dense, instrument-like. Light mode only (AD-012).
+       ============================================================ */
+    --background: 220 24% 97%;
+    --foreground: 222 30% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 30% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 30% 12%;
+
+    /* Blueprint blue — confident, slightly desaturated, engineered. */
+    --primary: 216 58% 30%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 220 16% 93%;
+    --secondary-foreground: 222 24% 20%;
+
+    --muted: 220 16% 94%;
+    --muted-foreground: 220 10% 42%;
+
+    --accent: 216 55% 95%;
+    --accent-foreground: 216 58% 28%;
+
+    --destructive: 0 68% 46%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 154 52% 32%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 34 92% 44%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 220 16% 88%;
+    --input: 220 16% 86%;
+    --ring: 216 58% 42%;
+
+    --radius: 0.5rem;
+
+    /* Layered enterprise shadows — hairline + soft ambient. */
+    --shadow-xs: 0 1px 2px 0 hsl(222 30% 12% / 0.04);
+    --shadow-sm: 0 1px 2px 0 hsl(222 30% 12% / 0.05), 0 1px 3px 0 hsl(222 30% 12% / 0.05);
+    --shadow-md: 0 2px 4px -1px hsl(222 30% 12% / 0.06), 0 4px 12px -2px hsl(222 30% 12% / 0.08);
+    --shadow-lg: 0 8px 24px -4px hsl(222 30% 12% / 0.12), 0 2px 6px -2px hsl(222 30% 12% / 0.08);
   }
 
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    /* Subtle blueprint dot-grid for atmosphere — barely-there. */
+    background-image: radial-gradient(hsl(216 30% 50% / 0.05) 1px, transparent 1px);
+    background-size: 22px 22px;
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    @apply tracking-tight;
+  }
+}
+
+@layer utilities {
+  .font-mono-nums {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .shadow-xs { box-shadow: var(--shadow-xs); }
+  .shadow-card { box-shadow: var(--shadow-sm); }
+  .shadow-pop { box-shadow: var(--shadow-md); }
+  .shadow-float { box-shadow: var(--shadow-lg); }
+
+  /* Staggered page-load reveal. */
+  @keyframes cx-rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-rise {
+    animation: cx-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 }

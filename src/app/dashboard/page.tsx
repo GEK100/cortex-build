@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { ArrowUpRight, AlertTriangle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ALLOWED_EMAIL, LABEL_COLOURS } from '@/lib/config'
 import { getDashboardData } from '@/lib/dashboard/build'
@@ -10,7 +11,7 @@ import { cn } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
-function Stat({
+function Metric({
   label,
   value,
   tone,
@@ -21,21 +22,62 @@ function Stat({
   tone?: 'alert'
   href?: string
 }) {
+  const alert = tone === 'alert' && value > 0
   const inner = (
     <>
-      <div className={cn('text-xl font-semibold tabular-nums', tone === 'alert' && value > 0 && 'text-destructive')}>
+      <div className="flex items-start justify-between">
+        <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          {label}
+        </span>
+        {href && (
+          <ArrowUpRight className="h-3 w-3 text-muted-foreground/50 transition-colors group-hover:text-primary" />
+        )}
+      </div>
+      <div
+        className={cn(
+          'mt-2 font-mono text-2xl font-semibold tabular-nums leading-none',
+          alert ? 'text-destructive' : 'text-foreground'
+        )}
+      >
         {value}
       </div>
-      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
     </>
   )
-  const className = 'block rounded-md border border-border px-3 py-2'
+  const className = cn(
+    'group block rounded-lg border bg-card p-3 shadow-xs transition-all',
+    alert ? 'border-destructive/30' : 'border-border',
+    href && 'hover:-translate-y-0.5 hover:border-ring/50 hover:shadow-card'
+  )
   return href ? (
-    <Link href={href} className={cn(className, 'hover:bg-muted/40')}>
+    <Link href={href} className={className}>
       {inner}
     </Link>
   ) : (
     <div className={className}>{inner}</div>
+  )
+}
+
+function Panel({
+  title,
+  action,
+  children,
+  className,
+}: {
+  title: string
+  action?: React.ReactNode
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <section className={cn('rounded-lg border border-border bg-card shadow-xs', className)}>
+      <header className="flex items-center justify-between border-b border-border px-4 py-2.5">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {title}
+        </h3>
+        {action}
+      </header>
+      <div className="p-4">{children}</div>
+    </section>
   )
 }
 
@@ -48,146 +90,165 @@ export default async function DashboardPage() {
 
   const activeProject = cookies().get(ACTIVE_PROJECT_COOKIE)?.value ?? 'all'
   const d = await getDashboardData(supabase, toFilterParam(activeProject))
+  const today = new Date().toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
 
   return (
-    <main className="mx-auto max-w-3xl space-y-5 px-4 py-4">
-      {/* Secondary navigation to the less-frequent views */}
-      <nav className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-        <Link href="/decisions" className="hover:text-foreground">Decisions</Link>
-        <Link href="/outputs" className="hover:text-foreground">Outputs</Link>
-        <Link href="/projects" className="hover:text-foreground">Projects</Link>
-        <Link href="/events" className="hover:text-foreground">All events</Link>
-        <Link href="/search" className="hover:text-foreground">Search</Link>
+    <div className="mx-auto max-w-6xl animate-rise space-y-6 px-4 py-6 md:px-6">
+      {/* Page header */}
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">Your live project picture.</p>
+        </div>
+        <span className="hidden font-mono text-xs uppercase tracking-wide text-muted-foreground sm:block">
+          {today}
+        </span>
+      </div>
+
+      {/* Mobile quick links (desktop uses the sidebar) */}
+      <nav className="flex flex-wrap gap-2 md:hidden">
+        {[
+          { href: '/decisions', label: 'Decisions' },
+          { href: '/outputs', label: 'Outputs' },
+          { href: '/projects', label: 'Projects' },
+          { href: '/events', label: 'All events' },
+        ].map((l) => (
+          <Link
+            key={l.href}
+            href={l.href}
+            className="rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-xs hover:text-foreground"
+          >
+            {l.label}
+          </Link>
+        ))}
       </nav>
 
-      {/* Morning brief */}
-      <section>
-        <h2 className="mb-2 text-lg font-medium tracking-tight">Today</h2>
+      {/* Health strip */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <Metric label="Open actions" value={d.health.actionsOpen} href="/actions" />
+        <Metric label="Overdue" value={d.health.actionsOverdue} tone="alert" href="/actions" />
+        <Metric label="Open RFIs" value={d.health.rfisOpen} href="/actions" />
+        <Metric label="Risks" value={d.health.risksOpen} href="/timeline" />
+        <Metric label="Snags" value={d.health.snagsOpen} href="/timeline" />
+        <Metric label="Decisions" value={d.health.decisionsRecorded} href="/decisions" />
+      </div>
+
+      {/* Today's brief */}
+      <Panel title="Today's brief">
         {d.brief ? (
-          <div className="rounded-lg border border-border bg-muted/10 p-3 text-sm leading-relaxed whitespace-pre-wrap">
-            {d.brief.body}
-          </div>
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{d.brief.body}</p>
         ) : (
           <p className="text-sm text-muted-foreground">
-            No brief yet — the synthesiser writes one each night. Capture through the day and
-            it will have something to work with.
+            No brief yet — the synthesiser writes one each night. Capture through the day and it
+            will have something to work with.
           </p>
         )}
-      </section>
-
-      {/* Health strip */}
-      <section>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-          <Stat label="Open actions" value={d.health.actionsOpen} href="/actions" />
-          <Stat label="Overdue" value={d.health.actionsOverdue} tone="alert" href="/actions" />
-          <Stat label="Open RFIs" value={d.health.rfisOpen} href="/actions" />
-          <Stat label="Risks" value={d.health.risksOpen} href="/timeline" />
-          <Stat label="Snags" value={d.health.snagsOpen} href="/timeline" />
-          <Stat label="Decisions" value={d.health.decisionsRecorded} href="/decisions" />
-        </div>
-      </section>
+      </Panel>
 
       {/* Things drifting */}
       {d.drift && (
-        <section>
-          <h3 className="mb-1 text-sm font-medium">Things drifting</h3>
-          <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3 text-sm leading-relaxed whitespace-pre-wrap">
+        <section className="rounded-lg border border-warning/40 bg-warning/5 shadow-xs">
+          <header className="flex items-center gap-2 border-b border-warning/30 px-4 py-2.5">
+            <AlertTriangle className="h-3.5 w-3.5 text-warning" />
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-warning">
+              Things drifting
+            </h3>
+          </header>
+          <div className="whitespace-pre-wrap p-4 text-sm leading-relaxed text-foreground">
             {d.drift.body}
           </div>
         </section>
       )}
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        {/* Stakeholder heatmap */}
-        <section>
-          <h3 className="mb-2 text-sm font-medium">Stakeholders</h3>
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Stakeholders */}
+        <Panel title="Stakeholders">
           {d.stakeholders.length === 0 ? (
-            <p className="text-xs text-muted-foreground">No contact recorded yet.</p>
+            <p className="text-sm text-muted-foreground">No contact recorded yet.</p>
           ) : (
-            <ul className="space-y-1">
+            <ul className="-my-1 divide-y divide-border">
               {d.stakeholders.map((s) => (
-                <li key={s.id} className="flex items-center justify-between text-sm">
-                  <Link href={`/stakeholders/${s.id}`} className="truncate hover:underline">
+                <li key={s.id} className="flex items-center justify-between py-1.5 text-sm">
+                  <Link href={`/stakeholders/${s.id}`} className="truncate font-medium hover:text-primary">
                     {s.name}
                   </Link>
                   <span
                     className={cn(
-                      'shrink-0 text-[11px]',
-                      s.daysSince !== null && s.daysSince > 14
-                        ? 'text-amber-700'
-                        : 'text-muted-foreground'
+                      'shrink-0 font-mono text-[11px] tabular-nums',
+                      s.daysSince !== null && s.daysSince > 14 ? 'text-warning' : 'text-muted-foreground'
                     )}
                     title={s.lastContact ?? ''}
                   >
-                    {s.daysSince === 0 ? 'today' : `${s.daysSince}d ago`}
+                    {s.daysSince === 0 ? 'today' : `${s.daysSince}d`}
                   </span>
                 </li>
               ))}
             </ul>
           )}
-        </section>
+        </Panel>
 
         {/* What's coming */}
-        <section>
-          <h3 className="mb-2 text-sm font-medium">What&apos;s coming</h3>
+        <Panel title="What's coming">
           <UpcomingMeetings days={14} />
-        </section>
+        </Panel>
       </div>
 
-      {/* Workstream grid */}
+      {/* Workstreams */}
       {d.workstreams.length > 0 && (
-        <section>
-          <h3 className="mb-2 text-sm font-medium">Workstreams</h3>
-          <div className="overflow-hidden rounded-lg border border-border text-sm">
-            <table className="w-full">
-              <thead className="bg-muted/30 text-[11px] uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="px-3 py-1.5 text-left font-medium">Trade package</th>
-                  <th className="px-2 py-1.5 text-right font-medium">Events</th>
-                  <th className="px-2 py-1.5 text-right font-medium">Risks</th>
-                  <th className="px-2 py-1.5 text-right font-medium">Snags</th>
-                  <th className="px-2 py-1.5 text-right font-medium">RFIs</th>
+        <Panel title="Workstreams" className="overflow-hidden">
+          <div className="-m-4 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-secondary/40 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <th className="px-4 py-2 text-left font-semibold">Trade package</th>
+                  <th className="px-3 py-2 text-right font-semibold">Events</th>
+                  <th className="px-3 py-2 text-right font-semibold">Risks</th>
+                  <th className="px-3 py-2 text-right font-semibold">Snags</th>
+                  <th className="px-4 py-2 text-right font-semibold">RFIs</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {d.workstreams.map((w) => (
-                  <tr key={w.trade}>
-                    <td className="px-3 py-1.5">{w.trade}</td>
-                    <td className="px-2 py-1.5 text-right tabular-nums">{w.total}</td>
-                    <td className="px-2 py-1.5 text-right tabular-nums">{w.risks || ''}</td>
-                    <td className="px-2 py-1.5 text-right tabular-nums">{w.snags || ''}</td>
-                    <td className="px-2 py-1.5 text-right tabular-nums">{w.rfis || ''}</td>
+                  <tr key={w.trade} className="transition-colors hover:bg-secondary/30">
+                    <td className="px-4 py-2 font-medium">{w.trade}</td>
+                    <td className="px-3 py-2 text-right font-mono tabular-nums text-muted-foreground">{w.total}</td>
+                    <td className="px-3 py-2 text-right font-mono tabular-nums">{w.risks || <span className="text-muted-foreground/40">·</span>}</td>
+                    <td className="px-3 py-2 text-right font-mono tabular-nums">{w.snags || <span className="text-muted-foreground/40">·</span>}</td>
+                    <td className="px-4 py-2 text-right font-mono tabular-nums">{w.rfis || <span className="text-muted-foreground/40">·</span>}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </section>
+        </Panel>
       )}
 
-      {/* Recent timeline strip */}
+      {/* Recent */}
       {d.timelineStrip.length > 0 && (
-        <section>
-          <h3 className="mb-2 text-sm font-medium">Recent</h3>
-          <ul className="space-y-1.5">
+        <Panel title="Recent" action={<Link href="/timeline" className="text-xs font-medium text-primary hover:underline">Timeline →</Link>}>
+          <ul className="-my-1 divide-y divide-border">
             {d.timelineStrip.map((e) => (
-              <li key={e.id} className="flex items-baseline gap-2 text-sm">
-                <span className="shrink-0 text-[11px] text-muted-foreground tabular-nums">
+              <li key={e.id} className="flex items-baseline gap-3 py-1.5 text-sm">
+                <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">
                   {e.captured_at.slice(5, 10)}
                 </span>
-                <Link href={`/events/${e.id}`} className="truncate hover:underline">
+                <Link href={`/events/${e.id}`} className="flex-1 truncate hover:text-primary">
                   {e.headline}
                 </Link>
                 {e.labels[0] && (
-                  <span className={cn('shrink-0 rounded-sm border px-1 text-[9px]', LABEL_COLOURS[e.labels[0]])}>
+                  <span className={cn('shrink-0 rounded border px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide', LABEL_COLOURS[e.labels[0]])}>
                     {e.labels[0]}
                   </span>
                 )}
               </li>
             ))}
           </ul>
-        </section>
+        </Panel>
       )}
-    </main>
+    </div>
   )
 }
