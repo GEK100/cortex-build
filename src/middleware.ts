@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
+import { isAllowedEmail } from '@/lib/config'
 
 /** Pages reachable without a session. */
 const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password', '/reset-password']
@@ -36,6 +37,15 @@ export async function middleware(request: NextRequest) {
   if (!user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+    return redirectPreservingCookies(url, supabaseResponse)
+  }
+
+  // Signed in but not on the allow-list — bounce to login with a notice.
+  // (Invite-only gate; the account exists in Supabase but cannot use the app.)
+  if (!isAllowedEmail(user.email)) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    url.searchParams.set('error', 'restricted')
     return redirectPreservingCookies(url, supabaseResponse)
   }
 

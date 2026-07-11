@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Boxes, ArrowRight, Mic, Radar, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -14,6 +14,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
+
+  useEffect(() => {
+    const err = new URLSearchParams(window.location.search).get('error')
+    if (err === 'restricted') {
+      setNotice('That account isn’t approved for access yet. Contact the owner for an invite.')
+    } else if (err === 'auth_failed') {
+      setNotice('That sign-in link was invalid or expired. Please try again.')
+    }
+  }, [])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -80,6 +90,12 @@ export default function LoginPage() {
           <div className="w-full max-w-sm animate-rise rounded-2xl border border-border bg-card/70 p-6 shadow-float backdrop-blur-xl sm:p-8">
             <h2 className="font-display text-2xl font-bold text-foreground">Sign in</h2>
             <p className="mt-1 text-sm text-muted-foreground">Welcome back. Continue to your workspace.</p>
+
+            {notice && (
+              <p className="mt-4 rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning">
+                {notice}
+              </p>
+            )}
 
             <div className="mt-6">
               <GoogleButton />

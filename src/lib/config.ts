@@ -6,7 +6,31 @@
 
 export const APP_NAME = 'Cortex'
 
+/** The system/background-job owner (cron agents, email intake). */
 export const ALLOWED_EMAIL = 'gareth@ictusflow.com'
+
+/**
+ * Access allow-list. Only these emails may USE the app, even with a valid
+ * Supabase account — this gates who gets past the auth guard while the product
+ * is invite-only. The data model is fully multi-tenant (per-account RLS), so
+ * lifting this to public signup later is a one-line change.
+ *
+ * Configure via the ALLOWED_EMAILS env var (comma-separated) without a deploy.
+ * Set ALLOWED_EMAILS="*" to allow anyone (public launch). Defaults to the owner.
+ */
+const rawAllow = process.env.ALLOWED_EMAILS?.trim()
+export const ALLOW_ALL_USERS = rawAllow === '*'
+export const ALLOWED_EMAILS: string[] =
+  rawAllow && rawAllow !== '*'
+    ? rawAllow.split(',').map((e) => e.trim().toLowerCase()).filter(Boolean)
+    : [ALLOWED_EMAIL.toLowerCase()]
+
+/** True if the email is permitted to use the app. */
+export function isAllowedEmail(email: string | null | undefined): boolean {
+  if (ALLOW_ALL_USERS) return true
+  if (!email) return false
+  return ALLOWED_EMAILS.includes(email.toLowerCase())
+}
 
 /**
  * Strict model tiering (build prompt §3.6):
