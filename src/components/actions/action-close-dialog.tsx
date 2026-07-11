@@ -69,11 +69,11 @@ export function ActionCloseDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-md border border-border bg-background shadow-lg"
+        className="w-full max-w-md rounded-xl border border-border bg-popover shadow-float"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="border-b border-border px-4 py-3">

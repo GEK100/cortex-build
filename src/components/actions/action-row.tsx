@@ -28,9 +28,9 @@ const SOURCE_LABEL: Record<ActionListRow['source_kind'], string> = {
 }
 
 const STATUS_STYLES: Record<ActionStatus, string> = {
-  open: 'bg-blue-50 text-blue-700 border-blue-200',
-  closed: 'bg-stone-100 text-stone-600 border-stone-200',
-  disputed: 'bg-rose-50 text-rose-700 border-rose-200',
+  open: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
+  closed: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+  disputed: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
   cancelled: 'bg-muted text-muted-foreground border-border',
 }
 

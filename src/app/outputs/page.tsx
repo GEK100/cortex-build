@@ -35,7 +35,7 @@ export default async function OutputsPage() {
       {review && (
         <section>
           <h3 className="mb-2 text-sm font-medium">{review.title || 'Weekly review'}</h3>
-          <div className="rounded-lg border border-border bg-muted/10 p-3 text-sm leading-relaxed whitespace-pre-wrap">
+          <div className="rounded-lg border border-border bg-card p-3 text-sm leading-relaxed whitespace-pre-wrap">
             {review.body}
           </div>
           <p className="mt-1 text-[10px] text-muted-foreground">

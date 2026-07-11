@@ -8,7 +8,7 @@ export function OfflineBanner() {
   if (isOnline) return null
 
   return (
-    <div className="fixed top-12 left-0 right-0 z-40 bg-amber-50 px-4 py-1.5 text-center text-xs font-medium text-amber-800 border-b border-amber-200">
+    <div className="sticky top-14 z-20 border-b border-warning/30 bg-warning/10 px-4 py-1.5 text-center text-xs font-medium text-warning">
       Offline — captures will sync when reconnected
     </div>
   )

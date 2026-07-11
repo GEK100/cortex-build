@@ -35,8 +35,8 @@ function Metric({
       </div>
       <div
         className={cn(
-          'mt-2 font-mono text-2xl font-semibold tabular-nums leading-none',
-          alert ? 'text-destructive' : 'text-foreground'
+          'mt-2.5 font-mono text-3xl font-semibold tabular-nums leading-none transition-all',
+          alert ? 'text-destructive' : 'text-foreground group-hover:text-primary group-hover:text-glow'
         )}
       >
         {value}
@@ -44,9 +44,11 @@ function Metric({
     </>
   )
   const className = cn(
-    'group block rounded-lg border bg-card p-3 shadow-xs transition-all',
-    alert ? 'border-destructive/30' : 'border-border',
-    href && 'hover:-translate-y-0.5 hover:border-ring/50 hover:shadow-card'
+    'group block rounded-lg border bg-card p-3.5 shadow-xs transition-all',
+    alert ? 'border-destructive/40' : 'border-border',
+    href && (alert
+      ? 'hover:-translate-y-0.5 hover:border-destructive/60'
+      : 'hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-glow')
   )
   return href ? (
     <Link href={href} className={className}>
@@ -101,8 +103,11 @@ export default async function DashboardPage() {
       {/* Page header */}
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">Your live project picture.</p>
+          <p className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
+            Site Intelligence
+          </p>
+          <h1 className="font-display text-3xl font-bold text-foreground md:text-4xl">Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Your live project picture.</p>
         </div>
         <span className="hidden font-mono text-xs uppercase tracking-wide text-muted-foreground sm:block">
           {today}

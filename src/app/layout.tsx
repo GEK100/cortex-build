@@ -1,11 +1,8 @@
 import type { Metadata, Viewport } from 'next'
-import { IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google'
+import { IBM_Plex_Sans, IBM_Plex_Mono, Bricolage_Grotesque } from 'next/font/google'
 import './globals.css'
 import { APP_NAME } from '@/lib/config'
-import { AppHeader } from '@/components/layout/app-header'
-import { NavBar } from '@/components/layout/nav-bar'
-import { Sidebar } from '@/components/layout/sidebar'
-import { OfflineBanner } from '@/components/layout/offline-banner'
+import { AppShell } from '@/components/layout/app-shell'
 import { Toaster } from '@/components/ui/sonner'
 import { Providers } from '@/components/providers'
 
@@ -21,6 +18,12 @@ const mono = IBM_Plex_Mono({
   variable: '--font-mono',
 })
 
+const display = Bricolage_Grotesque({
+  subsets: ['latin'],
+  weight: ['500', '600', '700', '800'],
+  variable: '--font-display',
+})
+
 export const metadata: Metadata = {
   title: APP_NAME,
   description: 'Construction project intelligence',
@@ -33,7 +36,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#1b3358',
+  themeColor: '#0a0d16',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -47,20 +50,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-GB">
-      <body className={`${sans.variable} ${mono.variable} font-sans antialiased`}>
+      <body className={`${sans.variable} ${mono.variable} ${display.variable} font-sans antialiased`}>
         <Providers>
-          {/* Desktop: persistent left rail. Mobile: hidden (bottom nav instead). */}
-          <Sidebar />
-
-          {/* Content column, offset by the sidebar on desktop. */}
-          <div className="flex min-h-screen flex-col md:pl-[15rem]">
-            <AppHeader />
-            <OfflineBanner />
-            <div className="flex-1 pb-20 md:pb-10">{children}</div>
-          </div>
-
-          {/* Mobile bottom nav. */}
-          <NavBar />
+          <AppShell>{children}</AppShell>
           <Toaster position="top-center" />
         </Providers>
       </body>

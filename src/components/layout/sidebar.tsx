@@ -16,10 +16,10 @@ export function Sidebar() {
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-border bg-card md:flex">
       {/* Brand */}
       <div className="flex h-14 items-center gap-2.5 border-b border-border px-5">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-xs">
+        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-glow">
           <Boxes className="h-4 w-4" strokeWidth={2} />
         </div>
-        <span className="text-sm font-semibold uppercase tracking-[0.18em] text-foreground">
+        <span className="font-display text-base font-bold uppercase tracking-[0.16em] text-foreground">
           {APP_NAME}
         </span>
       </div>

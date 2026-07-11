@@ -13,10 +13,10 @@ export function AppHeader() {
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card/85 px-4 backdrop-blur-md md:px-6">
       {/* Brand — mobile only (desktop shows it in the sidebar). */}
       <Link href="/" className="flex items-center gap-2.5 md:hidden">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-xs">
+        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-glow">
           <Boxes className="h-4 w-4" strokeWidth={2} />
         </div>
-        <span className="text-sm font-semibold uppercase tracking-[0.18em] text-foreground">
+        <span className="font-display text-base font-bold uppercase tracking-[0.16em] text-foreground">
           {APP_NAME}
         </span>
       </Link>

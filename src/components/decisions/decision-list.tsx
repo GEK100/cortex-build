@@ -20,10 +20,10 @@ interface DecisionRow {
 const STATUSES: DecisionStatus[] = ['recorded', 'implemented', 'superseded', 'reversed']
 
 const STATUS_STYLE: Record<DecisionStatus, string> = {
-  recorded: 'bg-stone-100 text-stone-700',
-  implemented: 'bg-green-100 text-green-700',
-  superseded: 'bg-amber-100 text-amber-700',
-  reversed: 'bg-red-100 text-red-700',
+  recorded: 'bg-secondary text-secondary-foreground',
+  implemented: 'bg-emerald-500/15 text-emerald-300',
+  superseded: 'bg-amber-500/15 text-amber-300',
+  reversed: 'bg-red-500/15 text-red-300',
 }
 
 export function DecisionList() {
