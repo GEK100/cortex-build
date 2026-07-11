@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { Download, FileText } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { ALLOWED_EMAIL } from '@/lib/config'
 import { PageHeader, PageShell } from '@/components/layout/page-header'
 
 export const dynamic = 'force-dynamic'
@@ -20,7 +19,7 @@ export default async function OutputsPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user || user.email !== ALLOWED_EMAIL) redirect('/login')
+  if (!user) redirect('/login')
 
   const { data: review } = await supabase
     .from('agent_outputs')

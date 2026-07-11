@@ -1,9 +1,10 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
-import { ALLOWED_EMAIL } from '@/lib/config'
 
 /**
- * Hard single-user guard. Every API route and server action must call this.
- * Returns the authenticated user or throws a Response (401/403).
+ * Authentication guard. Every API route and server action must call this.
+ * Returns the authenticated user or throws a Response (401). Data is isolated
+ * per account by RLS (`auth.uid() = user_id` on every table), so any signed-in
+ * user only ever sees their own rows — the app is multi-tenant.
  */
 export async function assertAuthorisedUser(supabase: SupabaseClient) {
   const {
@@ -13,12 +14,6 @@ export async function assertAuthorisedUser(supabase: SupabaseClient) {
 
   if (error || !user) {
     throw new Response('Unauthorised', { status: 401 })
-  }
-
-  if (user.email !== ALLOWED_EMAIL) {
-    throw new Response('Forbidden: this application is restricted', {
-      status: 403,
-    })
   }
 
   return user

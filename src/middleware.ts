@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
-import { ALLOWED_EMAIL } from '@/lib/config'
+
+/** Pages reachable without a session. */
+const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password', '/reset-password']
 
 /**
  * Build a redirect response that preserves every cookie that
@@ -25,23 +27,15 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // Allow auth callback and login page through
-  if (pathname.startsWith('/auth/callback') || pathname === '/login') {
+  // Allow the auth callback and the public auth pages through.
+  if (pathname.startsWith('/auth/callback') || PUBLIC_PATHS.includes(pathname)) {
     return supabaseResponse
   }
 
-  // No session — redirect to login
+  // No session — redirect to login.
   if (!user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    return redirectPreservingCookies(url, supabaseResponse)
-  }
-
-  // Wrong user — sign out and redirect to login with error
-  if (user.email !== ALLOWED_EMAIL) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    url.searchParams.set('error', 'restricted')
     return redirectPreservingCookies(url, supabaseResponse)
   }
 

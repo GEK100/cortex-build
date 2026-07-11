@@ -1,10 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { CalendarClock, Mail, Bell, Database } from 'lucide-react'
-import { ALLOWED_EMAIL } from '@/lib/config'
+import { CalendarClock, Mail, Bell, Database, UserCircle } from 'lucide-react'
 import { CalendarConnect } from '@/components/settings/calendar-connect'
 import { NotificationsToggle } from '@/components/settings/notifications-toggle'
 import { DataExport } from '@/components/settings/data-export'
+import { SignOutButton } from '@/components/auth/sign-out-button'
 import { PageHeader, PageShell } from '@/components/layout/page-header'
 
 function SettingCard({
@@ -38,7 +38,7 @@ export default async function SettingsPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user || user.email !== ALLOWED_EMAIL) redirect('/login')
+  if (!user) redirect('/login')
 
   const { data: token } = await supabase
     .from('oauth_tokens')
@@ -51,6 +51,10 @@ export default async function SettingsPage() {
       <PageHeader eyebrow="Workspace" title="Settings" subtitle="Connections, notifications, and your data." />
 
       <section className="space-y-4">
+        <SettingCard icon={UserCircle} title="Account" control={<SignOutButton />}>
+          Signed in as <span className="font-medium text-foreground">{user.email}</span>.
+        </SettingCard>
+
         <SettingCard icon={CalendarClock} title="Google Calendar" control={<CalendarConnect connected={!!token} />}>
           Cortex reads your calendar to surface what&apos;s coming and to prepare you before
           meetings. It never replaces your calendar.

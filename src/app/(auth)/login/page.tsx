@@ -1,37 +1,36 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Boxes, ArrowRight, Mic, Radar, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { APP_NAME, ALLOWED_EMAIL } from '@/lib/config'
+import { APP_NAME } from '@/lib/config'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { GoogleButton } from '@/components/auth/google-button'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
-  const [message, setMessage] = useState('')
+  const [password, setPassword] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
-    setStatus('sending')
+    setBusy(true)
+    setError('')
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    })
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      setStatus('error')
-      setMessage(error.message)
+      setError(error.message)
+      setBusy(false)
     } else {
-      setStatus('sent')
-      setMessage('Check your email for the sign-in link.')
+      // Full reload so the server picks up the new session cookie.
+      window.location.href = '/'
     }
   }
-
-  const busy = status === 'sending' || status === 'sent'
 
   return (
     <main className="relative min-h-screen w-full overflow-hidden">
@@ -80,37 +79,59 @@ export default function LoginPage() {
         <section className="flex flex-1 items-center justify-center px-6 pb-12 lg:px-12 lg:py-16">
           <div className="w-full max-w-sm animate-rise rounded-2xl border border-border bg-card/70 p-6 shadow-float backdrop-blur-xl sm:p-8">
             <h2 className="font-display text-2xl font-bold text-foreground">Sign in</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Welcome back. Enter your email to continue.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Welcome back. Continue to your workspace.</p>
 
-            <form onSubmit={handleLogin} className="mt-6 space-y-3">
+            <div className="mt-6">
+              <GoogleButton />
+            </div>
+
+            <div className="my-5 flex items-center gap-3">
+              <span className="h-px flex-1 bg-border" />
+              <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">or</span>
+              <span className="h-px flex-1 bg-border" />
+            </div>
+
+            <form onSubmit={handleLogin} className="space-y-3">
               <Input
                 type="email"
-                placeholder={ALLOWED_EMAIL}
+                placeholder="you@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={busy}
                 className="h-11"
+                autoComplete="email"
+              />
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={busy}
+                className="h-11"
+                autoComplete="current-password"
               />
               <Button type="submit" size="lg" className="w-full" disabled={busy}>
-                {status === 'sending' ? 'Sending…' : status === 'sent' ? 'Link sent' : (
+                {busy ? 'Signing in…' : (
                   <>
-                    Send sign-in link
+                    Sign in
                     <ArrowRight className="ml-1.5 h-4 w-4" />
                   </>
                 )}
               </Button>
             </form>
 
-            {message && (
-              <p className={`mt-4 text-sm ${status === 'error' ? 'text-destructive' : 'text-success'}`}>
-                {message}
-              </p>
-            )}
+            {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
 
-            <p className="mt-6 border-t border-border pt-4 text-center text-[11px] text-muted-foreground">
-              Protected workspace · access is restricted &amp; audited.
-            </p>
+            <div className="mt-5 flex items-center justify-between text-xs">
+              <Link href="/forgot-password" className="text-muted-foreground hover:text-foreground">
+                Forgot password?
+              </Link>
+              <Link href="/signup" className="font-medium text-primary hover:underline">
+                Create account
+              </Link>
+            </div>
           </div>
         </section>
       </div>

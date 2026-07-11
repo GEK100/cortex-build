@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { ArrowUpRight, AlertTriangle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { ALLOWED_EMAIL, LABEL_COLOURS } from '@/lib/config'
+import { LABEL_COLOURS } from '@/lib/config'
 import { getDashboardData } from '@/lib/dashboard/build'
 import { ACTIVE_PROJECT_COOKIE, toFilterParam } from '@/lib/projects/util'
 import { UpcomingMeetings } from '@/components/calendar/upcoming-meetings'
@@ -88,7 +88,7 @@ export default async function DashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user || user.email !== ALLOWED_EMAIL) redirect('/login')
+  if (!user) redirect('/login')
 
   const activeProject = cookies().get(ACTIVE_PROJECT_COOKIE)?.value ?? 'all'
   const d = await getDashboardData(supabase, toFilterParam(activeProject))

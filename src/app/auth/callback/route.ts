@@ -1,26 +1,28 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { ALLOWED_EMAIL } from '@/lib/config'
 
 /**
- * Magic-link callback. Constructs the success-redirect response first,
- * then binds the Supabase client's setAll hook so session cookies land
- * directly on that response. Relying on next/headers cookies()
- * auto-propagation into a hand-built NextResponse.redirect() is flaky
- * on Vercel with @supabase/ssr — this pattern mirrors Supabase's App
- * Router docs and is the robust path.
+ * Auth callback for every flow that returns a PKCE code — magic link, Google
+ * OAuth, email confirmation, and password recovery. Constructs the
+ * success-redirect response first, then binds the Supabase client's setAll
+ * hook so session cookies land directly on that response. Relying on
+ * next/headers cookies() auto-propagation into a hand-built
+ * NextResponse.redirect() is flaky on Vercel with @supabase/ssr — this pattern
+ * mirrors Supabase's App Router docs and is the robust path.
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  // Where to land after a successful exchange (e.g. /reset-password for recovery).
+  const next = searchParams.get('next') || '/'
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=auth_failed`)
   }
 
   const cookieStore = await cookies()
-  const successResponse = NextResponse.redirect(origin)
+  const successResponse = NextResponse.redirect(`${origin}${next}`)
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -43,11 +45,6 @@ export async function GET(request: Request) {
 
   if (error || !data.user) {
     return NextResponse.redirect(`${origin}/login?error=auth_failed`)
-  }
-
-  if (data.user.email !== ALLOWED_EMAIL) {
-    await supabase.auth.signOut()
-    return NextResponse.redirect(`${origin}/login?error=restricted`)
   }
 
   return successResponse

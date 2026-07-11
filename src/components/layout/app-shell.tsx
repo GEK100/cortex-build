@@ -7,7 +7,7 @@ import { Sidebar } from './sidebar'
 import { OfflineBanner } from './offline-banner'
 
 /** Routes that render bare, without the app chrome (sidebar/header/nav). */
-const BARE_PREFIXES = ['/login', '/auth']
+const BARE_PREFIXES = ['/login', '/signup', '/forgot-password', '/reset-password', '/auth']
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
