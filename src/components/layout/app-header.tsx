@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Settings, Search } from 'lucide-react'
+import { Settings, Search, Folder } from 'lucide-react'
 import { APP_NAME } from '@/lib/config'
 import { useOnlineStatus } from '@/lib/hooks/use-online-status'
 import { ProjectSwitcher } from '@/components/projects/project-switcher'
@@ -16,6 +16,13 @@ export function AppHeader() {
       </span>
       <div className="flex items-center gap-3">
         <ProjectSwitcher />
+        <Link
+          href="/projects"
+          className="text-muted-foreground hover:text-foreground"
+          aria-label="Manage projects"
+        >
+          <Folder className="h-4 w-4" />
+        </Link>
         <span
           className={`h-2 w-2 rounded-full ${
             isOnline ? 'bg-green-500' : 'bg-amber-500'
