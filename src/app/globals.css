@@ -19,9 +19,9 @@
     --popover: 223 32% 7%;
     --popover-foreground: 210 24% 94%;
 
-    /* Hi-vis amber — the signature. Used sparingly, hits hard. */
-    --primary: 33 100% 52%;
-    --primary-foreground: 224 45% 6%;
+    /* Hi-vis green — the signature. Used sparingly, hits hard. */
+    --primary: 147 78% 46%;
+    --primary-foreground: 150 60% 6%;
 
     --secondary: 222 22% 14%;
     --secondary-foreground: 210 22% 90%;
@@ -29,8 +29,8 @@
     --muted: 222 20% 13%;
     --muted-foreground: 214 14% 58%;
 
-    --accent: 33 88% 13%;
-    --accent-foreground: 33 100% 62%;
+    --accent: 150 70% 11%;
+    --accent-foreground: 147 78% 58%;
 
     --destructive: 0 76% 56%;
     --destructive-foreground: 0 0% 100%;
@@ -43,7 +43,7 @@
 
     --border: 220 20% 15%;
     --input: 220 18% 18%;
-    --ring: 33 100% 52%;
+    --ring: 147 78% 46%;
 
     --radius: 0.625rem;
 
@@ -52,7 +52,7 @@
     --shadow-sm: 0 1px 3px 0 hsl(0 0% 0% / 0.45);
     --shadow-md: 0 8px 24px -6px hsl(0 0% 0% / 0.55);
     --shadow-lg: 0 24px 60px -12px hsl(0 0% 0% / 0.7);
-    --shadow-glow: 0 0 0 1px hsl(33 100% 52% / 0.2), 0 10px 40px -8px hsl(33 100% 52% / 0.35);
+    --shadow-glow: 0 0 0 1px hsl(147 78% 46% / 0.22), 0 10px 40px -8px hsl(147 78% 46% / 0.38);
   }
 
   * {
@@ -68,8 +68,8 @@
     /* Cockpit atmosphere: warm top glow layered over a fine blueprint grid. */
     background-color: hsl(var(--background));
     background-image:
-      radial-gradient(55rem 34rem at 50% -8%, hsl(33 100% 52% / 0.10), transparent 70%),
-      radial-gradient(40rem 30rem at 100% 0%, hsl(206 100% 50% / 0.06), transparent 70%),
+      radial-gradient(55rem 34rem at 50% -8%, hsl(147 78% 46% / 0.10), transparent 70%),
+      radial-gradient(40rem 30rem at 100% 0%, hsl(190 90% 45% / 0.05), transparent 70%),
       linear-gradient(hsl(210 40% 90% / 0.028) 1px, transparent 1px),
       linear-gradient(90deg, hsl(210 40% 90% / 0.028) 1px, transparent 1px);
     background-size: 100% 100%, 100% 100%, 42px 42px, 42px 42px;
@@ -101,14 +101,14 @@
   .shadow-float { box-shadow: var(--shadow-lg); }
   .shadow-glow { box-shadow: var(--shadow-glow); }
 
-  /* Amber text glow for signature numbers/marks. */
+  /* Green text glow for signature numbers/marks. */
   .text-glow {
-    text-shadow: 0 0 28px hsl(33 100% 52% / 0.45);
+    text-shadow: 0 0 28px hsl(147 78% 46% / 0.5);
   }
 
-  /* Amber gradient text for hero headlines. */
+  /* Green gradient text for hero headlines. */
   .text-gradient {
-    background: linear-gradient(180deg, hsl(40 100% 72%), hsl(30 100% 52%));
+    background: linear-gradient(180deg, hsl(150 85% 74%), hsl(147 80% 44%));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -125,8 +125,8 @@
 
   /* Slow accent pulse for live/hero elements. */
   @keyframes cx-pulse-glow {
-    0%, 100% { box-shadow: 0 0 0 0 hsl(33 100% 52% / 0.0); }
-    50% { box-shadow: 0 0 32px 4px hsl(33 100% 52% / 0.25); }
+    0%, 100% { box-shadow: 0 0 0 0 hsl(147 78% 46% / 0.0); }
+    50% { box-shadow: 0 0 32px 4px hsl(147 78% 46% / 0.28); }
   }
   .animate-pulse-glow {
     animation: cx-pulse-glow 3s ease-in-out infinite;
